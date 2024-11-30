@@ -25,12 +25,27 @@
         }
 
         .header {
+            position: relative; /* Ensure relative positioning for absolute elements */
             text-align: center;
             background: linear-gradient(135deg, #1db4f5, #004d99);
             color: white;
             padding: 20px;
             font-size: 1.5rem;
             font-weight: bold;
+        }
+
+        .about-icon {
+            position: absolute;
+            top: 20px; /* Adjust as needed */
+            right: 20px; /* Adjust as needed */
+            color: white;
+            font-size: 1.5rem;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .about-icon:hover {
+            color: #f0f0f0; /* Slightly lighter color on hover */
         }
 
         .grid-container {
@@ -143,6 +158,9 @@
     <!-- Header -->
     <div class="header">
         كل ما يخص سيارتك في مكان واحد
+        <a href="pages/about.html" class="about-icon" title="حول">
+            <i class="fas fa-info-circle"></i>
+        </a>
     </div>
 
     <!-- Grid Section -->
@@ -184,7 +202,6 @@
         <div class="tip"><strong>    </strong>  </div>
 
       </div>
-
 
     <script>
         function toggleOverlay() {
