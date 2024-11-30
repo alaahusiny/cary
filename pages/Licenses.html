@@ -68,7 +68,6 @@
             border-radius: 5px;
             background-color: #fff;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            display: none; /* Initially hide the status */
         }
         .valid {
             color: #4CAF50; /* Green */
@@ -127,25 +126,24 @@
                 return;
             }
 
-            const currentDate = new Date(); // Get current date
-            const currentYear = currentDate.getFullYear();
-
-            // Load dates from localStorage
-            function loadDates() {
+            // Load dates and status from localStorage
+            function loadDatesAndStatus() {
                 const licenseExpiry = localStorage.getItem(`licenseExpiry_${carPlate}`);
                 const annualExpiry = localStorage.getItem(`annualExpiry_${carPlate}`);
                 if (licenseExpiry) document.getElementById('licenseExpiry').value = licenseExpiry;
                 if (annualExpiry) document.getElementById('annualExpiry').value = annualExpiry;
+                updateStatus("licenseExpiry", "licenseStatus", "إجازتك");
+                updateStatus("annualExpiry", "annualStatus", "سنوية سيارتك");
             }
 
             // Save dates to localStorage
-            function saveDates() {
-                localStorage.setItem(`licenseExpiry_${carPlate}`, document.getElementById('licenseExpiry').value);
-                localStorage.setItem(`annualExpiry_${carPlate}`, document.getElementById('annualExpiry').value);
+            function saveDates(inputId) {
+                localStorage.setItem(`${inputId}_${carPlate}`, document.getElementById(inputId).value);
             }
 
             // Function to calculate remaining time (years, months, days)
             function calculateRemainingTime(expiryDate) {
+                const currentDate = new Date();
                 const diffTime = expiryDate - currentDate;
                 const remainingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Convert milliseconds to days
 
@@ -169,33 +167,41 @@
 
                 statusElement.style.display = "block"; // Show the status element
 
+                const currentDate = new Date();
+                const currentYear = currentDate.getFullYear();
+                const currentMonth = currentDate.getMonth();
+
+                let statusClass = "";
+                let message = "";
+
                 if (remainingTime.years < 0 || (remainingTime.years === 0 && remainingTime.months < 0) || (remainingTime.years === 0 && remainingTime.months === 0 && remainingTime.days < 0)) {
-                    const yearsText = expiryDate.getFullYear() === currentYear ? "" : `${Math.abs(remainingTime.years)} سنة و `;
-                    statusElement.innerText = `${type} انتهت منذ ${yearsText}${Math.abs(remainingTime.months)} شهر و ${Math.abs(remainingTime.days)} يومًا`;
-                    statusElement.className = "expired";
-                } else if (remainingTime.years === 0 && remainingTime.months === 0 && remainingTime.days <= 30) {
-                    const yearsText = remainingTime.years === 0 ? "" : `${remainingTime.years} سنة و `;
-                    statusElement.innerText = `تبقى على نفاد ${type} ${yearsText}${remainingTime.months} شهر و ${remainingTime.days} يومًا`;
-                    statusElement.className = "warning";
+                    const yearsText = expiryDate.getFullYear() !== currentYear ? `${Math.abs(remainingTime.years)} سنة و ` : "";
+                    const monthsText = expiryDate.getMonth() !== currentMonth ? `${Math.abs(remainingTime.months)} شهر و ` : "";
+                    message = `${type} انتهت منذ ${yearsText}${monthsText}${Math.abs(remainingTime.days)} يومًا`;
+                    statusClass = "expired";
                 } else {
-                    const yearsText = remainingTime.years === 0 ? "" : `${remainingTime.years} سنة و `;
-                    statusElement.innerText = `تبقى على نفاد ${type} ${yearsText}${remainingTime.months} شهر و ${remainingTime.days} يومًا`;
-                    statusElement.className = "valid";
+                    const yearsText = expiryDate.getFullYear() !== currentYear ? `${remainingTime.years} سنة و ` : "";
+                    const monthsText = expiryDate.getMonth() !== currentMonth ? `${remainingTime.months} شهر و ` : "";
+                    message = `تبقى على نفاد ${type} ${yearsText}${monthsText}${remainingTime.days} يومًا`;
+                    statusClass = remainingTime.days <= 30 ? "warning" : "valid";
                 }
+
+                statusElement.innerText = message;
+                statusElement.className = statusClass;
             }
 
-            // Load dates on page load
-            loadDates();
+            // Load dates and status on page load
+            loadDatesAndStatus();
 
             // Add event listeners for date inputs
             document.getElementById("licenseExpiry").addEventListener("change", () => {
+                saveDates("licenseExpiry");
                 updateStatus("licenseExpiry", "licenseStatus", "إجازتك");
-                saveDates();
             });
 
             document.getElementById("annualExpiry").addEventListener("change", () => {
+                saveDates("annualExpiry");
                 updateStatus("annualExpiry", "annualStatus", "سنوية سيارتك");
-                saveDates();
             });
         });
     </script>
